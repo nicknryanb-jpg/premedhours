@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PreMed Hours — Track Shadowing, Clinical & Research Hours</title>
-<meta name="description" content="Free tracker for premed students. Log shadowing, clinical experience, volunteering, and research hours the way AMCAS asks for them. Data stays in your browser.">
+<title>PreMedHours — Free Shadowing, Clinical & Research Hours Tracker for Premed Students</title>
+<meta name="description" content="Free tracker for premed students. Log shadowing, clinical experience, volunteering, research, and leadership hours the way AMCAS asks for them. Charts, goals, printable reports. Your data stays in your browser.">
+<meta name="keywords" content="premed hours tracker, shadowing hours log, clinical hours tracker, AMCAS hours, premed volunteer hours">
+<meta property="og:title" content="PreMedHours — Free Hours Tracker for Premed Students">
+<meta property="og:description" content="Log shadowing, clinical, volunteering & research hours. Goal tracking, charts, printable reports. Free, no account needed.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PreMedHours — Free Hours Tracker for Premed Students">
+<meta name="twitter:description" content="Log shadowing, clinical, volunteering & research hours. Free, no account needed.">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Cpath d='M32 16v32M16 32h32' stroke='white' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #f6f8fb;
@@ -13,94 +22,140 @@
     --muted: #64748b;
     --accent: #0f766e;
     --accent-light: #ccfbf1;
-    --shadow: #0d9488;
-    --clinical: #2563eb;
-    --volunteer: #d97706;
-    --research: #7c3aed;
     --border: #e2e8f0;
     --danger: #dc2626;
+    --hero-grad: linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #2563eb 130%);
+    --c-shadowing: #0d9488;
+    --c-clinical: #2563eb;
+    --c-volunteering: #d97706;
+    --c-research: #7c3aed;
+    --c-leadership: #db2777;
+    --c-other: #64748b;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1522;
+    --card: #1a2332;
+    --ink: #e6ecf5;
+    --muted: #8b9bb3;
+    --accent: #2dd4bf;
+    --accent-light: #134e4a;
+    --border: #2b3850;
+    --danger: #f87171;
   }
   * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg); color: var(--ink); line-height: 1.5;
+    transition: background 0.25s, color 0.25s;
   }
   header {
     background: var(--card); border-bottom: 1px solid var(--border);
-    padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 10;
   }
-  header h1 { font-size: 1.25rem; }
+  header h1 { font-size: 1.2rem; }
   header h1 span { color: var(--accent); }
-  header p { color: var(--muted); font-size: 0.85rem; }
-  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  header .tag-line { color: var(--muted); font-size: 0.8rem; }
+  .hbtns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
 
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  /* Hero (first visit) */
+  .hero {
+    background: var(--hero-grad); color: #fff; border-radius: 16px;
+    padding: 40px 32px; margin-bottom: 24px;
+  }
+  .hero h2 { font-size: 1.9rem; line-height: 1.2; margin-bottom: 10px; }
+  .hero p { opacity: 0.92; max-width: 560px; margin-bottom: 6px; }
+  .hero .feats { display: flex; gap: 18px; flex-wrap: wrap; margin: 18px 0 22px; font-size: 0.88rem; }
+  .hero .feats span { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 999px; }
+  .hero .cta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hero button { font-size: 1rem; }
+  .btn-white { background: #fff; color: #0f766e; }
+  .btn-outline-w { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.6); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .stat {
     background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 16px; border-top: 4px solid var(--muted);
+    padding: 13px 15px; border-top: 4px solid var(--muted);
   }
-  .stat .num { font-size: 1.6rem; font-weight: 700; }
-  .stat .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
-  .stat.total { border-top-color: var(--ink); }
-  .stat.shadowing { border-top-color: var(--shadow); }
-  .stat.clinical { border-top-color: var(--clinical); }
-  .stat.volunteer { border-top-color: var(--volunteer); }
-  .stat.research { border-top-color: var(--research); }
+  .stat .num { font-size: 1.5rem; font-weight: 700; }
+  .stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .stat .sub2 { font-size: 0.72rem; color: var(--muted); }
 
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: 12px;
     padding: 20px; margin-bottom: 24px;
   }
-  .card h2 { font-size: 1.05rem; margin-bottom: 14px; }
+  .card h2 { font-size: 1.05rem; margin-bottom: 4px; }
+  .card .hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
   form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
   label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
   input, select, textarea {
     width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 0.95rem; font-family: inherit; background: #fff; color: var(--ink);
+    font-size: 0.95rem; font-family: inherit; background: var(--card); color: var(--ink);
   }
   input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-light); border-color: var(--accent); }
   textarea { resize: vertical; min-height: 44px; }
   button {
-    padding: 10px 18px; border: none; border-radius: 8px; font-size: 0.95rem;
+    padding: 9px 16px; border: none; border-radius: 8px; font-size: 0.9rem;
     font-weight: 600; cursor: pointer; font-family: inherit;
   }
   .btn-primary { background: var(--accent); color: #fff; }
+  [data-theme="dark"] .btn-primary { color: #06251f; }
   .btn-primary:hover { filter: brightness(1.1); }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   .btn-ghost:hover { color: var(--ink); }
+  .btn-icon { padding: 8px 10px; font-size: 1rem; line-height: 1; }
 
   .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-  .toolbar select { width: auto; }
+  .toolbar select, .toolbar input { width: auto; }
+  .toolbar input[type="search"] { flex: 1; min-width: 140px; }
   .spacer { flex: 1; }
 
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
   th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-  .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; color: #fff; white-space: nowrap; }
-  .tag.Shadowing { background: var(--shadow); }
-  .tag.Clinical { background: var(--clinical); }
-  .tag.Volunteering { background: var(--volunteer); }
-  .tag.Research { background: var(--research); }
-  .del { background: none; color: var(--danger); padding: 2px 6px; font-size: 1rem; }
+  th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.73rem; font-weight: 600; color: #fff; white-space: nowrap; }
+  .rowbtn { background: none; padding: 2px 6px; font-size: 0.95rem; }
+  .rowbtn.edit { color: var(--accent); }
+  .rowbtn.del { color: var(--danger); }
   .empty { text-align: center; color: var(--muted); padding: 32px 0; }
 
   .goalbar { background: var(--border); border-radius: 999px; height: 10px; overflow: hidden; margin-top: 6px; }
-  .goalbar > div { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.3s; }
+  .goalbar > div { height: 100%; border-radius: 999px; transition: width 0.3s; }
   .goal-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .goal-row .name { width: 110px; font-size: 0.85rem; font-weight: 600; }
+  .goal-row .name { width: 108px; font-size: 0.84rem; font-weight: 600; }
   .goal-row .bar-wrap { flex: 1; }
-  .goal-row .pct { width: 90px; text-align: right; font-size: 0.8rem; color: var(--muted); }
+  .goal-row .pct { min-width: 118px; text-align: right; font-size: 0.78rem; color: var(--muted); }
+
+  .badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+    text-align: center; min-width: 96px; opacity: 0.45;
+  }
+  .badge.earned { opacity: 1; border-color: var(--accent); background: var(--accent-light); }
+  .badge .emoji { font-size: 1.5rem; }
+  .badge .bname { font-size: 0.75rem; font-weight: 700; margin-top: 2px; }
+  .badge .bhours { font-size: 0.68rem; color: var(--muted); }
+
+  .chart-wrap { overflow-x: auto; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; background: var(--dot); }
 
   footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 24px; }
+  footer a { color: var(--accent); }
   @media (max-width: 640px) {
     th:nth-child(5), td:nth-child(5) { display: none; }
+    .hero { padding: 28px 20px; }
+    .hero h2 { font-size: 1.5rem; }
   }
 
-  /* Printable report: hidden on screen, only thing visible when printing */
+  /* Printable report */
   #report { display: none; }
   @media print {
     body > header, body > main, body > footer { display: none !important; }
-    #report { display: block; padding: 24px; font-size: 12pt; }
+    #report { display: block; padding: 24px; font-size: 12pt; color: #000; }
     #report h1 { font-size: 18pt; margin-bottom: 2px; }
     #report .sub { color: #555; font-size: 10pt; margin-bottom: 18px; }
     #report h2 { font-size: 13pt; margin: 18px 0 6px; border-bottom: 1px solid #999; padding-bottom: 3px; }
@@ -116,24 +171,41 @@
 <header>
   <div>
     <h1>PreMed<span>Hours</span></h1>
-    <p>Track shadowing, clinical, volunteering & research hours — the way applications ask for them.</p>
+    <div class="tag-line">The free hours tracker for future physicians</div>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+  <div class="hbtns">
     <button class="btn-ghost" onclick="printReport()">Print report</button>
-    <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
+    <button class="btn-ghost" onclick="exportCSV()">CSV</button>
     <button class="btn-ghost" onclick="backupJSON()">Backup</button>
     <button class="btn-ghost" onclick="document.getElementById('restoreFile').click()">Restore</button>
     <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreJSON(this)">
+    <button class="btn-ghost btn-icon" id="themeBtn" onclick="toggleTheme()" title="Toggle dark mode">&#9789;</button>
   </div>
 </header>
 
 <div id="report"></div>
 
 <main>
+  <section class="hero" id="hero" style="display:none;">
+    <h2>Every hour counts.<br>Prove it.</h2>
+    <p>Med school applications ask exactly how many hours you shadowed, volunteered, and researched — and where, and when. Students who track as they go don't have to guess three years later.</p>
+    <div class="feats">
+      <span>&#128200; Goal tracking &amp; charts</span>
+      <span>&#128196; Printable counselor reports</span>
+      <span>&#128274; 100% private — data never leaves your browser</span>
+      <span>&#128176; Free forever, no account</span>
+    </div>
+    <div class="cta">
+      <button class="btn-white" onclick="document.getElementById('date').focus()">Start logging</button>
+      <button class="btn-outline-w" onclick="loadDemo()">See it with sample data</button>
+    </div>
+  </section>
+
   <section class="stats" id="stats"></section>
 
   <section class="card">
-    <h2>Log an experience</h2>
+    <h2 id="formTitle">Log an experience</h2>
+    <p class="hint">Write a sentence about what you saw — future-you writing essays will thank you.</p>
     <form id="entryForm">
       <div class="row">
         <div>
@@ -142,12 +214,7 @@
         </div>
         <div>
           <label for="category">Category</label>
-          <select id="category" required>
-            <option>Shadowing</option>
-            <option>Clinical</option>
-            <option>Volunteering</option>
-            <option>Research</option>
-          </select>
+          <select id="category" required></select>
         </div>
         <div>
           <label for="hours">Hours</label>
@@ -160,18 +227,32 @@
       </div>
       <div class="row">
         <div style="grid-column: 1 / -1;">
-          <label for="notes">What did you do / observe? (great for essays later)</label>
+          <label for="notes">What did you do / observe?</label>
           <textarea id="notes" placeholder="e.g. Observed a knee replacement; surgeon explained imaging workflow"></textarea>
         </div>
       </div>
-      <button type="submit" class="btn-primary">Add entry</button>
+      <button type="submit" class="btn-primary" id="submitBtn">Add entry</button>
+      <button type="button" class="btn-ghost" id="cancelBtn" style="display:none" onclick="cancelEdit()">Cancel</button>
     </form>
+  </section>
+
+  <section class="card" id="chartCard">
+    <h2>Hours over time</h2>
+    <p class="hint">Last 12 months. Admissions loves consistency more than totals.</p>
+    <div class="chart-wrap" id="chart"></div>
+    <div class="legend" id="legend"></div>
   </section>
 
   <section class="card">
     <h2>Goal progress</h2>
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Common targets applicants aim for. Edit them to fit your plan.</p>
+    <p class="hint">Common applicant targets — click a number to change it.</p>
     <div id="goals"></div>
+  </section>
+
+  <section class="card">
+    <h2>Milestones</h2>
+    <p class="hint" id="milestoneHint"></p>
+    <div class="badges" id="badges"></div>
   </section>
 
   <section class="card">
@@ -179,12 +260,8 @@
     <div class="toolbar">
       <select id="filter" onchange="render()">
         <option value="All">All categories</option>
-        <option>Shadowing</option>
-        <option>Clinical</option>
-        <option>Volunteering</option>
-        <option>Research</option>
       </select>
-      <div class="spacer"></div>
+      <input type="search" id="search" placeholder="Search organization or notes&hellip;" oninput="render()">
       <button class="btn-ghost" onclick="clearAll()">Clear all</button>
     </div>
     <div id="tableWrap"></div>
@@ -193,22 +270,44 @@
 
 <footer>
   Your data never leaves this browser — it's stored locally on your device. Use <b>Backup</b> regularly to save a copy.<br>
-  PreMedHours is a free student-built tool. Not affiliated with AAMC/AMCAS.
+  PreMedHours is free and built by a student. Not affiliated with AAMC/AMCAS.
+  &middot; <a href="mailto:nicknryanb@gmail.com?subject=PreMedHours%20feedback">Send feedback</a>
 </footer>
+
+<!-- Analytics: sign up free at goatcounter.com, then uncomment and set your code:
+<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+-->
 
 <script>
 "use strict";
-const KEY = "premedhours.entries.v1";
-const GOALKEY = "premedhours.goals.v1";
-const CATS = ["Shadowing", "Clinical", "Volunteering", "Research"];
-const DEFAULT_GOALS = { Shadowing: 50, Clinical: 150, Volunteering: 100, Research: 100 };
+var KEY = "premedhours.entries.v1";
+var GOALKEY = "premedhours.goals.v1";
+var THEMEKEY = "premedhours.theme";
 
-let entries = load(KEY, []);
-let goals = load(GOALKEY, DEFAULT_GOALS);
+var CATS = ["Shadowing", "Clinical", "Volunteering", "Research", "Leadership", "Other"];
+var COLORS = {
+  Shadowing: "#0d9488", Clinical: "#2563eb", Volunteering: "#d97706",
+  Research: "#7c3aed", Leadership: "#db2777", Other: "#64748b"
+};
+var DEFAULT_GOALS = { Shadowing: 50, Clinical: 150, Volunteering: 100, Research: 100, Leadership: 50, Other: 25 };
+var MILESTONES = [
+  { h: 10, emoji: "🌱", name: "First Steps" },
+  { h: 25, emoji: "🩺", name: "Committed" },
+  { h: 50, emoji: "🧪", name: "Dedicated" },
+  { h: 100, emoji: "💯", name: "Century Club" },
+  { h: 250, emoji: "🩻", name: "Iron Will" },
+  { h: 500, emoji: "⚕️", name: "Future Doc" },
+  { h: 1000, emoji: "🏆", name: "Legend" }
+];
+
+var entries = load(KEY, []);
+var goals = load(GOALKEY, {});
+CATS.forEach(function (c) { if (!(typeof goals[c] === "number" && goals[c] > 0)) goals[c] = DEFAULT_GOALS[c]; });
+var editingId = null;
 
 function load(key, fallback) {
   try {
-    const raw = localStorage.getItem(key);
+    var raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
   } catch (e) { return fallback; }
 }
@@ -216,31 +315,94 @@ function save() {
   localStorage.setItem(KEY, JSON.stringify(entries));
   localStorage.setItem(GOALKEY, JSON.stringify(goals));
 }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function fmt(n) { return (Math.round(n * 100) / 100).toLocaleString(); }
 
-document.getElementById("date").valueAsDate = new Date();
+/* ---------- Theme ---------- */
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  var btn = document.getElementById("themeBtn");
+  if (btn) btn.innerHTML = t === "dark" ? "&#9788;" : "&#9789;";
+}
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem(THEMEKEY, cur);
+  applyTheme(cur);
+}
+(function initTheme() {
+  var saved = null;
+  try { saved = localStorage.getItem(THEMEKEY); } catch (e) {}
+  var prefersDark = (typeof matchMedia === "function") && matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(saved || (prefersDark ? "dark" : "light"));
+})();
+
+/* ---------- Form setup ---------- */
+(function initForm() {
+  var sel = document.getElementById("category");
+  var filt = document.getElementById("filter");
+  CATS.forEach(function (c) {
+    sel.innerHTML += '<option>' + c + '</option>';
+    filt.innerHTML += '<option>' + c + '</option>';
+  });
+  document.getElementById("date").valueAsDate = new Date();
+})();
 
 document.getElementById("entryForm").addEventListener("submit", function (e) {
   e.preventDefault();
-  entries.push({
-    id: Date.now(),
+  var data = {
     date: document.getElementById("date").value,
     category: document.getElementById("category").value,
     hours: parseFloat(document.getElementById("hours").value),
     org: document.getElementById("org").value.trim(),
     notes: document.getElementById("notes").value.trim()
-  });
+  };
+  if (editingId !== null) {
+    var en = entries.find(function (x) { return x.id === editingId; });
+    if (en) { en.date = data.date; en.category = data.category; en.hours = data.hours; en.org = data.org; en.notes = data.notes; }
+    cancelEdit();
+  } else {
+    data.id = Date.now();
+    entries.push(data);
+    this.reset();
+    document.getElementById("date").valueAsDate = new Date();
+  }
   save();
-  this.reset();
-  document.getElementById("date").valueAsDate = new Date();
   render();
 });
 
+function editEntry(id) {
+  var en = entries.find(function (x) { return x.id === id; });
+  if (!en) return;
+  editingId = id;
+  document.getElementById("date").value = en.date;
+  document.getElementById("category").value = en.category;
+  document.getElementById("hours").value = en.hours;
+  document.getElementById("org").value = en.org;
+  document.getElementById("notes").value = en.notes;
+  document.getElementById("formTitle").textContent = "Edit entry";
+  document.getElementById("submitBtn").textContent = "Save changes";
+  document.getElementById("cancelBtn").style.display = "inline-block";
+  if (document.getElementById("date").scrollIntoView) document.getElementById("date").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function cancelEdit() {
+  editingId = null;
+  document.getElementById("entryForm").reset();
+  document.getElementById("date").valueAsDate = new Date();
+  document.getElementById("formTitle").textContent = "Log an experience";
+  document.getElementById("submitBtn").textContent = "Add entry";
+  document.getElementById("cancelBtn").style.display = "none";
+}
+
 function removeEntry(id) {
-  entries = entries.filter(en => en.id !== id);
+  entries = entries.filter(function (en) { return en.id !== id; });
+  if (editingId === id) cancelEdit();
   save();
   render();
 }
-
 function clearAll() {
   if (confirm("Delete ALL entries? This cannot be undone.")) {
     entries = [];
@@ -248,130 +410,240 @@ function clearAll() {
     render();
   }
 }
-
 function setGoal(cat, val) {
-  const n = parseFloat(val);
+  var n = parseFloat(val);
   if (!isNaN(n) && n > 0) { goals[cat] = n; save(); render(); }
 }
 
+/* ---------- Aggregation ---------- */
 function totals() {
-  const t = { All: 0 };
-  CATS.forEach(c => t[c] = 0);
-  entries.forEach(en => { t[en.category] += en.hours; t.All += en.hours; });
+  var t = { All: 0 };
+  CATS.forEach(function (c) { t[c] = 0; });
+  entries.forEach(function (en) {
+    if (t[en.category] === undefined) t[en.category] = 0;
+    t[en.category] += en.hours;
+    t.All += en.hours;
+  });
   return t;
 }
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[c]);
+function monthKey(dateStr) { return dateStr.slice(0, 7); }
+function lastNMonths(n) {
+  var out = [];
+  var d = new Date();
+  d.setDate(1);
+  for (var i = n - 1; i >= 0; i--) {
+    var dd = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    out.push(dd.getFullYear() + "-" + String(dd.getMonth() + 1).padStart(2, "0"));
+  }
+  return out;
+}
+function monthlyData() {
+  var months = lastNMonths(12);
+  var data = {};
+  months.forEach(function (m) { data[m] = {}; });
+  entries.forEach(function (en) {
+    var m = monthKey(en.date);
+    if (data[m]) data[m][en.category] = (data[m][en.category] || 0) + en.hours;
+  });
+  return { months: months, data: data };
+}
+function thisMonthHours() {
+  var m = lastNMonths(1)[0];
+  return entries.reduce(function (s, en) { return monthKey(en.date) === m ? s + en.hours : s; }, 0);
+}
+function weekStreak() {
+  if (entries.length === 0) return 0;
+  var weeks = {};
+  entries.forEach(function (en) {
+    var d = new Date(en.date + "T12:00:00");
+    var jan = new Date(d.getFullYear(), 0, 1);
+    var wk = Math.floor(((d - jan) / 86400000 + jan.getDay()) / 7);
+    weeks[d.getFullYear() + "-" + wk] = true;
+  });
+  var now = new Date();
+  var streak = 0;
+  for (var i = 0; i < 520; i++) {
+    var d2 = new Date(now.getTime() - i * 7 * 86400000);
+    var jan2 = new Date(d2.getFullYear(), 0, 1);
+    var wk2 = Math.floor(((d2 - jan2) / 86400000 + jan2.getDay()) / 7);
+    if (weeks[d2.getFullYear() + "-" + wk2]) streak++;
+    else if (i > 0) break; /* current week may be empty without breaking streak */
+  }
+  return streak;
 }
 
-function fmt(n) { return (Math.round(n * 100) / 100).toLocaleString(); }
-
+/* ---------- Rendering ---------- */
 function render() {
-  const t = totals();
+  var t = totals();
 
-  // Stats
+  /* Hero visibility */
+  document.getElementById("hero").style.display = entries.length === 0 ? "block" : "none";
+
+  /* Stats */
+  var statCats = CATS.filter(function (c) { return t[c] > 0 || ["Shadowing", "Clinical", "Volunteering", "Research"].indexOf(c) !== -1; });
+  var streak = weekStreak();
   document.getElementById("stats").innerHTML =
-    '<div class="stat total"><div class="num">' + fmt(t.All) + '</div><div class="label">Total hours</div></div>' +
-    CATS.map(c =>
-      '<div class="stat ' + c.toLowerCase() + '"><div class="num">' + fmt(t[c]) + '</div><div class="label">' + c + '</div></div>'
-    ).join("");
+    '<div class="stat" style="border-top-color:var(--ink)"><div class="num">' + fmt(t.All) + '</div><div class="label">Total hours</div>' +
+    '<div class="sub2">' + fmt(thisMonthHours()) + ' this month' + (streak > 1 ? ' &middot; ' + streak + '-week streak &#128293;' : '') + '</div></div>' +
+    statCats.map(function (c) {
+      return '<div class="stat" style="border-top-color:' + COLORS[c] + '"><div class="num">' + fmt(t[c]) + '</div><div class="label">' + c + '</div></div>';
+    }).join("");
 
-  // Goals
-  document.getElementById("goals").innerHTML = CATS.map(c => {
-    const pct = Math.min(100, goals[c] > 0 ? (t[c] / goals[c]) * 100 : 0);
+  /* Chart */
+  renderChart();
+
+  /* Goals */
+  document.getElementById("goals").innerHTML = CATS.map(function (c) {
+    var pct = Math.min(100, goals[c] > 0 ? (t[c] / goals[c]) * 100 : 0);
     return '<div class="goal-row">' +
       '<div class="name">' + c + '</div>' +
-      '<div class="bar-wrap"><div class="goalbar"><div style="width:' + pct.toFixed(1) + '%"></div></div></div>' +
-      '<div class="pct">' + fmt(t[c]) + ' / <input type="number" value="' + goals[c] + '" min="1" style="width:58px;padding:2px 4px;font-size:0.8rem;" onchange="setGoal(\'' + c + '\', this.value)"> h</div>' +
+      '<div class="bar-wrap"><div class="goalbar"><div style="width:' + pct.toFixed(1) + '%;background:' + COLORS[c] + '"></div></div></div>' +
+      '<div class="pct">' + fmt(t[c]) + ' / <input type="number" value="' + goals[c] + '" min="1" style="width:56px;padding:2px 4px;font-size:0.78rem;" onchange="setGoal(\'' + c + '\', this.value)"> h' +
+      (pct >= 100 ? ' &#9989;' : '') + '</div>' +
       '</div>';
   }).join("");
 
-  // Table
-  const filter = document.getElementById("filter").value;
-  const rows = entries
-    .filter(en => filter === "All" || en.category === filter)
-    .sort((a, b) => b.date.localeCompare(a.date));
+  /* Milestones */
+  var earned = MILESTONES.filter(function (m) { return t.All >= m.h; });
+  var next = MILESTONES.find(function (m) { return t.All < m.h; });
+  document.getElementById("milestoneHint").innerHTML = next
+    ? fmt(next.h - t.All) + " hours until <b>" + next.name + "</b>"
+    : "You've earned every milestone. Genuinely impressive.";
+  document.getElementById("badges").innerHTML = MILESTONES.map(function (m) {
+    return '<div class="badge' + (t.All >= m.h ? ' earned' : '') + '">' +
+      '<div class="emoji">' + m.emoji + '</div>' +
+      '<div class="bname">' + m.name + '</div>' +
+      '<div class="bhours">' + m.h + ' h</div></div>';
+  }).join("");
+
+  /* Table */
+  var filter = document.getElementById("filter").value;
+  var q = (document.getElementById("search").value || "").toLowerCase();
+  var rows = entries.filter(function (en) {
+    if (filter !== "All" && en.category !== filter) return false;
+    if (q && (en.org + " " + en.notes + " " + en.category).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  }).sort(function (a, b) { return b.date.localeCompare(a.date); });
 
   if (rows.length === 0) {
     document.getElementById("tableWrap").innerHTML =
-      '<div class="empty">No entries yet. Log your first experience above — future-you writing essays will thank you.</div>';
+      '<div class="empty">' + (entries.length === 0
+        ? "No entries yet. Log your first experience above."
+        : "Nothing matches that filter.") + '</div>';
     return;
   }
-
   document.getElementById("tableWrap").innerHTML =
     '<table><thead><tr><th>Date</th><th>Category</th><th>Hours</th><th>Organization</th><th>Notes</th><th></th></tr></thead><tbody>' +
-    rows.map(en =>
-      '<tr>' +
-      '<td>' + esc(en.date) + '</td>' +
-      '<td><span class="tag ' + esc(en.category) + '">' + esc(en.category) + '</span></td>' +
-      '<td>' + fmt(en.hours) + '</td>' +
-      '<td>' + esc(en.org) + '</td>' +
-      '<td style="color:var(--muted);max-width:280px;">' + esc(en.notes) + '</td>' +
-      '<td><button class="del" title="Delete" onclick="removeEntry(' + en.id + ')">&times;</button></td>' +
-      '</tr>'
-    ).join("") +
+    rows.map(function (en) {
+      return '<tr>' +
+        '<td>' + esc(en.date) + '</td>' +
+        '<td><span class="pill" style="background:' + (COLORS[en.category] || "#64748b") + '">' + esc(en.category) + '</span></td>' +
+        '<td>' + fmt(en.hours) + '</td>' +
+        '<td>' + esc(en.org) + '</td>' +
+        '<td style="color:var(--muted);max-width:280px;">' + esc(en.notes) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+        '<button class="rowbtn edit" title="Edit" onclick="editEntry(' + en.id + ')">&#9998;</button>' +
+        '<button class="rowbtn del" title="Delete" onclick="removeEntry(' + en.id + ')">&times;</button>' +
+        '</td></tr>';
+    }).join("") +
     '</tbody></table>';
 }
 
+function renderChart() {
+  var md = monthlyData();
+  var months = md.months, data = md.data;
+  var maxTotal = 0;
+  months.forEach(function (m) {
+    var s = 0;
+    CATS.forEach(function (c) { s += data[m][c] || 0; });
+    if (s > maxTotal) maxTotal = s;
+  });
+  if (maxTotal === 0) {
+    document.getElementById("chart").innerHTML = '<div class="empty">Your chart appears once you log hours.</div>';
+    document.getElementById("legend").innerHTML = "";
+    return;
+  }
+  var W = 720, H = 190, pad = 30, bw = (W - pad) / 12 - 8;
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 26) + '" style="width:100%;min-width:560px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Monthly hours chart">';
+  /* gridlines */
+  [0.25, 0.5, 0.75, 1].forEach(function (f) {
+    var y = H - f * (H - 14);
+    svg += '<line x1="' + pad + '" y1="' + y + '" x2="' + W + '" y2="' + y + '" stroke="var(--border)" stroke-width="1"/>' +
+      '<text x="' + (pad - 5) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="var(--muted)">' + Math.round(maxTotal * f) + '</text>';
+  });
+  months.forEach(function (m, i) {
+    var x = pad + i * ((W - pad) / 12) + 4;
+    var y = H;
+    CATS.forEach(function (c) {
+      var v = data[m][c] || 0;
+      if (v <= 0) return;
+      var h = (v / maxTotal) * (H - 14);
+      y -= h;
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + h + '" rx="2" fill="' + COLORS[c] + '"><title>' + m + " " + c + ": " + fmt(v) + ' h</title></rect>';
+    });
+    var lbl = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][parseInt(m.slice(5), 10) - 1];
+    svg += '<text x="' + (x + bw / 2) + '" y="' + (H + 14) + '" text-anchor="middle" font-size="9.5" fill="var(--muted)">' + lbl + '</text>';
+  });
+  svg += '</svg>';
+  document.getElementById("chart").innerHTML = svg;
+  var t = totals();
+  document.getElementById("legend").innerHTML = CATS.filter(function (c) { return t[c] > 0; })
+    .map(function (c) { return '<span style="--dot:' + COLORS[c] + '">' + c + '</span>'; }).join("");
+}
+
+/* ---------- Export / backup ---------- */
 function exportCSV() {
   if (entries.length === 0) { alert("Nothing to export yet."); return; }
-  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
-  const csv = ["Date,Category,Hours,Organization,Notes"]
-    .concat(entries
-      .slice()
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .map(en => [en.date, en.category, en.hours, q(en.org), q(en.notes)].join(",")))
+  var q = function (s) { return '"' + String(s).replace(/"/g, '""') + '"'; };
+  var csv = ["Date,Category,Hours,Organization,Notes"]
+    .concat(entries.slice().sort(function (a, b) { return a.date.localeCompare(b.date); })
+      .map(function (en) { return [en.date, en.category, en.hours, q(en.org), q(en.notes)].join(","); }))
     .join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "premed-hours.csv";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadFile(csv, "premed-hours.csv", "text/csv");
 }
-
 function backupJSON() {
-  const blob = new Blob(
-    [JSON.stringify({ app: "premedhours", version: 1, exported: new Date().toISOString(), goals: goals, entries: entries }, null, 2)],
-    { type: "application/json" }
+  downloadFile(
+    JSON.stringify({ app: "premedhours", version: 2, exported: new Date().toISOString(), goals: goals, entries: entries }, null, 2),
+    "premedhours-backup-" + new Date().toISOString().slice(0, 10) + ".json",
+    "application/json"
   );
-  const a = document.createElement("a");
+}
+function downloadFile(content, name, type) {
+  var blob = new Blob([content], { type: type });
+  var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "premedhours-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.download = name;
   a.click();
   URL.revokeObjectURL(a.href);
 }
-
 function restoreJSON(input) {
-  const file = input.files && input.files[0];
+  var file = input.files && input.files[0];
   if (!file) return;
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onload = function () {
     try {
-      const data = JSON.parse(reader.result);
-      const list = Array.isArray(data) ? data : data.entries;
+      var data = JSON.parse(reader.result);
+      var list = Array.isArray(data) ? data : data.entries;
       if (!Array.isArray(list)) throw new Error("bad format");
-      const clean = list.filter(en =>
-        en && typeof en.date === "string" && CATS.includes(en.category) &&
-        typeof en.hours === "number" && isFinite(en.hours) && en.hours > 0
-      ).map(en => ({
-        id: en.id || (Date.now() + Math.random()),
-        date: en.date,
-        category: en.category,
-        hours: en.hours,
-        org: String(en.org || ""),
-        notes: String(en.notes || "")
-      }));
+      var clean = list.filter(function (en) {
+        return en && typeof en.date === "string" && CATS.indexOf(en.category) !== -1 &&
+          typeof en.hours === "number" && isFinite(en.hours) && en.hours > 0;
+      }).map(function (en) {
+        return {
+          id: en.id || (Date.now() + Math.random()),
+          date: en.date, category: en.category, hours: en.hours,
+          org: String(en.org || ""), notes: String(en.notes || "")
+        };
+      });
       if (clean.length === 0) throw new Error("no valid entries");
-      const mode = entries.length === 0 || confirm(
+      var merge = entries.length === 0 || confirm(
         "Backup contains " + clean.length + " entries.\n\nOK = MERGE with your current " + entries.length + " entries\nCancel = REPLACE everything with the backup"
       );
-      entries = mode ? entries.concat(clean.filter(c => !entries.some(e => e.id === c.id))) : clean;
+      entries = merge
+        ? entries.concat(clean.filter(function (c) { return !entries.some(function (e) { return e.id === c.id; }); }))
+        : clean;
       if (data.goals && typeof data.goals === "object") {
-        CATS.forEach(c => { if (typeof data.goals[c] === "number" && data.goals[c] > 0) goals[c] = data.goals[c]; });
+        CATS.forEach(function (c) { if (typeof data.goals[c] === "number" && data.goals[c] > 0) goals[c] = data.goals[c]; });
       }
       save();
       render();
@@ -384,24 +656,24 @@ function restoreJSON(input) {
   reader.readAsText(file);
 }
 
+/* ---------- Printable report ---------- */
 function printReport() {
   if (entries.length === 0) { alert("Log some hours first."); return; }
-  const t = totals();
-  const dates = entries.map(en => en.date).sort();
-  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-
-  let html = "<h1>Experience Hours Report</h1>" +
+  var t = totals();
+  var dates = entries.map(function (en) { return en.date; }).sort();
+  var fmtDate = function (d) {
+    return new Date(d + "T12:00:00").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  };
+  var html = "<h1>Experience Hours Report</h1>" +
     '<div class="sub">Generated ' + new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) +
     " &middot; Covers " + fmtDate(dates[0]) + " &ndash; " + fmtDate(dates[dates.length - 1]) +
     " &middot; " + entries.length + " logged entries</div>";
-
-  CATS.forEach(cat => {
-    const rows = entries.filter(en => en.category === cat);
+  CATS.forEach(function (cat) {
+    var rows = entries.filter(function (en) { return en.category === cat; });
     if (rows.length === 0) return;
-    // group by organization
-    const orgs = {};
-    rows.forEach(en => {
-      const key = en.org || "(unspecified)";
+    var orgs = {};
+    rows.forEach(function (en) {
+      var key = en.org || "(unspecified)";
       if (!orgs[key]) orgs[key] = { hours: 0, count: 0, first: en.date, last: en.date };
       orgs[key].hours += en.hours;
       orgs[key].count += 1;
@@ -410,20 +682,49 @@ function printReport() {
     });
     html += "<h2>" + cat + " &mdash; " + fmt(t[cat]) + " hours</h2>" +
       "<table><thead><tr><th>Organization / Physician</th><th>Entries</th><th>Period</th><th>Hours</th></tr></thead><tbody>" +
-      Object.keys(orgs).sort((a, b) => orgs[b].hours - orgs[a].hours).map(o => {
-        const g = orgs[o];
+      Object.keys(orgs).sort(function (a, b) { return orgs[b].hours - orgs[a].hours; }).map(function (o) {
+        var g = orgs[o];
         return "<tr><td>" + esc(o) + "</td><td>" + g.count + "</td><td>" +
           fmtDate(g.first) + " &ndash; " + fmtDate(g.last) + "</td><td>" + fmt(g.hours) + "</td></tr>";
       }).join("") +
       "</tbody></table>";
   });
-
   html += '<div class="grand">Total: ' + fmt(t.All) + " hours</div>" +
     '<div class="sig"><div>Student signature / date</div><div>Advisor or supervisor signature / date</div></div>' +
     '<div class="sub" style="margin-top:24px;">Generated with PreMedHours &mdash; self-reported log maintained by the student.</div>';
-
   document.getElementById("report").innerHTML = html;
   window.print();
+}
+
+/* ---------- Demo data ---------- */
+function loadDemo() {
+  if (entries.length > 0 && !confirm("This adds sample entries alongside your data. Continue?")) return;
+  var now = new Date();
+  var mk = function (monthsAgo, day) {
+    var d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, day);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  };
+  var demo = [
+    { m: 7, d: 12, c: "Shadowing", h: 4, o: "Dr. Patel — Family Medicine", n: "First shadow day; watched 9 patient visits, learned SOAP notes" },
+    { m: 6, d: 3, c: "Shadowing", h: 5, o: "Dr. Patel — Family Medicine", n: "Saw diabetes management counseling up close" },
+    { m: 6, d: 18, c: "Volunteering", h: 3, o: "Riverside Food Bank", n: "Weekly shift — intake desk" },
+    { m: 5, d: 9, c: "Clinical", h: 4, o: "St. Mary's Hospital — ER volunteer", n: "Restocked bays, transported patients, watched triage" },
+    { m: 5, d: 23, c: "Volunteering", h: 3, o: "Riverside Food Bank", n: "Weekly shift" },
+    { m: 4, d: 6, c: "Clinical", h: 4, o: "St. Mary's Hospital — ER volunteer", n: "First code observed from hallway; debriefed with charge nurse" },
+    { m: 4, d: 20, c: "Research", h: 6, o: "State U Biology Lab", n: "Trained on PCR basics; prepped samples" },
+    { m: 3, d: 4, c: "Research", h: 5, o: "State U Biology Lab", n: "Ran first gel; learned data logging protocol" },
+    { m: 3, d: 15, c: "Shadowing", h: 6, o: "Dr. Nguyen — Orthopedic Surgery", n: "Observed knee arthroscopy; surgeon explained imaging" },
+    { m: 2, d: 8, c: "Clinical", h: 4, o: "St. Mary's Hospital — ER volunteer", n: "Regular shift" },
+    { m: 2, d: 22, c: "Leadership", h: 2, o: "HOSA Chapter", n: "Organized blood drive info session — 40 attendees" },
+    { m: 1, d: 5, c: "Research", h: 5, o: "State U Biology Lab", n: "Poster prep for symposium" },
+    { m: 1, d: 19, c: "Clinical", h: 4, o: "St. Mary's Hospital — ER volunteer", n: "Regular shift" },
+    { m: 0, d: 2, c: "Shadowing", h: 5, o: "Dr. Nguyen — Orthopedic Surgery", n: "Clinic day — post-op follow-ups" }
+  ];
+  demo.forEach(function (x, i) {
+    entries.push({ id: Date.now() + i, date: mk(x.m, x.d), category: x.c, hours: x.h, org: x.o, notes: x.n });
+  });
+  save();
+  render();
 }
 
 render();
