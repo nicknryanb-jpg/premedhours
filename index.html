@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PreMedHours — Free Shadowing, Clinical & Research Hours Tracker for Premed Students</title>
+  <link rel="canonical" href="https://premedhours.vercel.app/">
 <meta name="description" content="Free tracker for premed students. Log shadowing, clinical experience, volunteering, research, and leadership hours the way AMCAS asks for them. Charts, goals, printable reports. Your data stays in your browser.">
 <meta name="keywords" content="premed hours tracker, shadowing hours log, clinical hours tracker, AMCAS hours, premed volunteer hours">
 <meta property="og:title" content="PreMedHours — Free Hours Tracker for Premed Students">
@@ -743,5 +744,13 @@ function removeDemo() {
 
 render();
 </script>
+  <!-- Redirect github.io visitors to the Vercel site -->
+<script>
+  if (location.hostname.endsWith('github.io')) {
+    location.replace('https://premedhours.vercel.app/');
+  }
+</script>
+<!-- Vercel Analytics (only loads on the Vercel domain) -->
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
