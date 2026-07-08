@@ -95,6 +95,21 @@
   @media (max-width: 640px) {
     th:nth-child(5), td:nth-child(5) { display: none; }
   }
+
+  /* Printable report: hidden on screen, only thing visible when printing */
+  #report { display: none; }
+  @media print {
+    body > header, body > main, body > footer { display: none !important; }
+    #report { display: block; padding: 24px; font-size: 12pt; }
+    #report h1 { font-size: 18pt; margin-bottom: 2px; }
+    #report .sub { color: #555; font-size: 10pt; margin-bottom: 18px; }
+    #report h2 { font-size: 13pt; margin: 18px 0 6px; border-bottom: 1px solid #999; padding-bottom: 3px; }
+    #report table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+    #report th, #report td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #ddd; }
+    #report .grand { font-size: 13pt; font-weight: 700; margin-top: 16px; }
+    #report .sig { margin-top: 48px; display: flex; gap: 40px; }
+    #report .sig div { flex: 1; border-top: 1px solid #333; padding-top: 4px; font-size: 9pt; color: #555; }
+  }
 </style>
 </head>
 <body>
@@ -103,10 +118,16 @@
     <h1>PreMed<span>Hours</span></h1>
     <p>Track shadowing, clinical, volunteering & research hours — the way applications ask for them.</p>
   </div>
-  <div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn-ghost" onclick="printReport()">Print report</button>
     <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
+    <button class="btn-ghost" onclick="backupJSON()">Backup</button>
+    <button class="btn-ghost" onclick="document.getElementById('restoreFile').click()">Restore</button>
+    <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreJSON(this)">
   </div>
 </header>
+
+<div id="report"></div>
 
 <main>
   <section class="stats" id="stats"></section>
@@ -171,7 +192,7 @@
 </main>
 
 <footer>
-  Your data never leaves this browser — it's stored locally on your device.<br>
+  Your data never leaves this browser — it's stored locally on your device. Use <b>Backup</b> regularly to save a copy.<br>
   PreMedHours is a free student-built tool. Not affiliated with AAMC/AMCAS.
 </footer>
 
@@ -310,6 +331,99 @@ function exportCSV() {
   a.download = "premed-hours.csv";
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function backupJSON() {
+  const blob = new Blob(
+    [JSON.stringify({ app: "premedhours", version: 1, exported: new Date().toISOString(), goals: goals, entries: entries }, null, 2)],
+    { type: "application/json" }
+  );
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "premedhours-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function restoreJSON(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function () {
+    try {
+      const data = JSON.parse(reader.result);
+      const list = Array.isArray(data) ? data : data.entries;
+      if (!Array.isArray(list)) throw new Error("bad format");
+      const clean = list.filter(en =>
+        en && typeof en.date === "string" && CATS.includes(en.category) &&
+        typeof en.hours === "number" && isFinite(en.hours) && en.hours > 0
+      ).map(en => ({
+        id: en.id || (Date.now() + Math.random()),
+        date: en.date,
+        category: en.category,
+        hours: en.hours,
+        org: String(en.org || ""),
+        notes: String(en.notes || "")
+      }));
+      if (clean.length === 0) throw new Error("no valid entries");
+      const mode = entries.length === 0 || confirm(
+        "Backup contains " + clean.length + " entries.\n\nOK = MERGE with your current " + entries.length + " entries\nCancel = REPLACE everything with the backup"
+      );
+      entries = mode ? entries.concat(clean.filter(c => !entries.some(e => e.id === c.id))) : clean;
+      if (data.goals && typeof data.goals === "object") {
+        CATS.forEach(c => { if (typeof data.goals[c] === "number" && data.goals[c] > 0) goals[c] = data.goals[c]; });
+      }
+      save();
+      render();
+      alert("Restored! You now have " + entries.length + " entries.");
+    } catch (e) {
+      alert("Couldn't read that file — make sure it's a PreMedHours backup (.json).");
+    }
+    input.value = "";
+  };
+  reader.readAsText(file);
+}
+
+function printReport() {
+  if (entries.length === 0) { alert("Log some hours first."); return; }
+  const t = totals();
+  const dates = entries.map(en => en.date).sort();
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+  let html = "<h1>Experience Hours Report</h1>" +
+    '<div class="sub">Generated ' + new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) +
+    " &middot; Covers " + fmtDate(dates[0]) + " &ndash; " + fmtDate(dates[dates.length - 1]) +
+    " &middot; " + entries.length + " logged entries</div>";
+
+  CATS.forEach(cat => {
+    const rows = entries.filter(en => en.category === cat);
+    if (rows.length === 0) return;
+    // group by organization
+    const orgs = {};
+    rows.forEach(en => {
+      const key = en.org || "(unspecified)";
+      if (!orgs[key]) orgs[key] = { hours: 0, count: 0, first: en.date, last: en.date };
+      orgs[key].hours += en.hours;
+      orgs[key].count += 1;
+      if (en.date < orgs[key].first) orgs[key].first = en.date;
+      if (en.date > orgs[key].last) orgs[key].last = en.date;
+    });
+    html += "<h2>" + cat + " &mdash; " + fmt(t[cat]) + " hours</h2>" +
+      "<table><thead><tr><th>Organization / Physician</th><th>Entries</th><th>Period</th><th>Hours</th></tr></thead><tbody>" +
+      Object.keys(orgs).sort((a, b) => orgs[b].hours - orgs[a].hours).map(o => {
+        const g = orgs[o];
+        return "<tr><td>" + esc(o) + "</td><td>" + g.count + "</td><td>" +
+          fmtDate(g.first) + " &ndash; " + fmtDate(g.last) + "</td><td>" + fmt(g.hours) + "</td></tr>";
+      }).join("") +
+      "</tbody></table>";
+  });
+
+  html += '<div class="grand">Total: ' + fmt(t.All) + " hours</div>" +
+    '<div class="sig"><div>Student signature / date</div><div>Advisor or supervisor signature / date</div></div>' +
+    '<div class="sub" style="margin-top:24px;">Generated with PreMedHours &mdash; self-reported log maintained by the student.</div>';
+
+  document.getElementById("report").innerHTML = html;
+  window.print();
 }
 
 render();
