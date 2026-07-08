@@ -201,6 +201,8 @@
     </div>
   </section>
 
+  <div id="demoBanner"></div>
+
   <section class="stats" id="stats"></section>
 
   <section class="card">
@@ -274,8 +276,9 @@
   &middot; <a href="mailto:nicknryanb@gmail.com?subject=PreMedHours%20feedback">Send feedback</a>
 </footer>
 
-<script data-goatcounter="https://premedhours.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+<!-- Analytics: sign up free at goatcounter.com, then uncomment and set your code:
+<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+-->
 
 <script>
 "use strict";
@@ -478,6 +481,14 @@ function render() {
   /* Hero visibility */
   document.getElementById("hero").style.display = entries.length === 0 ? "block" : "none";
 
+  /* Demo banner */
+  var demoCount = entries.filter(function (en) { return en.demo; }).length;
+  document.getElementById("demoBanner").innerHTML = demoCount === 0 ? "" :
+    '<div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;">' +
+    '<span style="font-size:0.88rem;">&#128064; You\'re viewing <b>' + demoCount + ' sample entries</b> — they\'re marked so your real hours stay separate.</span>' +
+    '<span class="spacer"></span>' +
+    '<button class="btn-primary" onclick="removeDemo()">Remove sample data</button></div>';
+
   /* Stats */
   var statCats = CATS.filter(function (c) { return t[c] > 0 || ["Shadowing", "Clinical", "Volunteering", "Research"].indexOf(c) !== -1; });
   var streak = weekStreak();
@@ -631,7 +642,7 @@ function restoreJSON(input) {
         return {
           id: en.id || (Date.now() + Math.random()),
           date: en.date, category: en.category, hours: en.hours,
-          org: String(en.org || ""), notes: String(en.notes || "")
+          org: String(en.org || ""), notes: String(en.notes || ""), demo: !!en.demo
         };
       });
       if (clean.length === 0) throw new Error("no valid entries");
@@ -720,8 +731,13 @@ function loadDemo() {
     { m: 0, d: 2, c: "Shadowing", h: 5, o: "Dr. Nguyen — Orthopedic Surgery", n: "Clinic day — post-op follow-ups" }
   ];
   demo.forEach(function (x, i) {
-    entries.push({ id: Date.now() + i, date: mk(x.m, x.d), category: x.c, hours: x.h, org: x.o, notes: x.n });
+    entries.push({ id: Date.now() + i, date: mk(x.m, x.d), category: x.c, hours: x.h, org: x.o, notes: x.n, demo: true });
   });
+  save();
+  render();
+}
+function removeDemo() {
+  entries = entries.filter(function (en) { return !en.demo; });
   save();
   render();
 }
